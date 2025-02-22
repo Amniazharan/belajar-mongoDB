@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            display: none;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <h2>Awak daftarlah</h2>
+    <form id="registerForm">
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit">Register</button>
+    </form>
+    <div id="message" class="message"></div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                const messageDiv = document.getElementById('message');
+                messageDiv.style.display = 'block';
+
+                if (response.ok) {
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = 'eyyy awk dh berjaya daftar hixx!';
+                    document.getElementById('registerForm').reset();
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = data.message || 'Registration failed';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                const messageDiv = document.getElementById('message');
+                messageDiv.style.display = 'block';
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'An error occurred during registration';
+            }
+        });
+    </script>
+</body>
+</html>

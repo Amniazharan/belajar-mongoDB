@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input, select {
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+        }
+        #history {
+            margin-top: 20px;
+        }
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h2>Simple Calculator</h2>
+    <form id="calculatorForm">
+        <div class="form-group">
+            <label for="num1">Number 1:</label>
+            <input type="number" id="num1" required>
+        </div>
+        <div class="form-group">
+            <label for="num2">Number 2:</label>
+            <input type="number" id="num2" required>
+        </div>
+        <div class="form-group">
+            <label for="operation">Operation:</label>
+            <select id="operation">
+                <option value="add">Add (+)</option>
+                <option value="subtract">Subtract (-)</option>
+                <option value="multiply">Multiply (×)</option>
+                <option value="divide">Divide (÷)</option>
+            </select>
+        </div>
+        <button type="submit">Calculate</button>
+    </form>
+
+    <div id="result" style="margin-top: 20px; font-weight: bold;"></div>
+
+    <h3>Calculation History</h3>
+    <div id="history"></div>
+
+    <script>
+        // Function to load history
+        async function loadHistory() {
+            try {
+                const response = await fetch('/history');
+                const history = await response.json();
+                
+                const historyDiv = document.getElementById('history');
+                historyDiv.innerHTML = history.map(calc => {
+                    const opSymbol = {
+                        'add': '+',
+                        'subtract': '-',
+                        'multiply': '×',
+                        'divide': '÷'
+                    }[calc.operation];
+                    
+                    return `
+                        <div class="history-item">
+                            ${calc.num1} ${opSymbol} ${calc.num2} = ${calc.result}
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        // Load history when page loads
+        loadHistory();
+
+        // Handle form submission
+        document.getElementById('calculatorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                num1: document.getElementById('num1').value,
+                num2: document.getElementById('num2').value,
+                operation: document.getElementById('operation').value
+            };
+
+            try {
+                const response = await fetch('/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                document.getElementById('result').textContent = `Result: ${data.result}`;
+                
+                // Reload history after new calculation
+                loadHistory();
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = 'An error occurred';
+            }
+        });
+    </script>
+</body>
+</html>
